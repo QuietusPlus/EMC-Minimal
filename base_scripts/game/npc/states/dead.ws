@@ -292,10 +292,17 @@ state Dead in CNewNPC extends Base
 		{
 			Sleep( 5.0f );
 			
-			while( !parent.CanBeDesctructed() && i < 120 )
-			{
-				Sleep(1.0);
-				i+=1;
+			// EMC - Longer delay before corpse rot
+			if ( theGame.GetIsPlayerOnArena() ) {
+				while( !parent.CanBeDesctructed() && i < 120 ) {
+					Sleep(1.0);
+					i+=1;
+				}
+			} else {
+				while( !parent.CanBeDesctructed() || i < 300 ) {
+					Sleep(1.0);
+					i+=1;
+				}
 			}
 		}
 		SelfDestruct();
