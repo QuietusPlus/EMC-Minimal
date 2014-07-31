@@ -3405,7 +3405,7 @@ import class CPlayer extends CActor
 	
 	function KeepCombatMode()
 	{
-		combatMode = 7;
+		combatMode = 5;
 		theGame.CreateNoSaveLock( 'PlayerInCombat', combatModeSaveLock );
 		
 		if ( thePlayer.AreCombatHotKeysBlocked() ) thePlayer.SetCombatHotKeysBlocked( false );
