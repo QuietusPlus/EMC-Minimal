@@ -3194,7 +3194,7 @@ import class CPlayer extends CActor
 		lastSign = ST_LastSign;
 		soundMaterials = LoadCSV("globals/sound_materials.csv");
 		
-		SetEnemySelectionWeights(75.0, 20.0, 1.0, 1.25, 0.2, 0.75, 0.2, 0.6, 1.0, -1.0, 160, 0.1);
+		SetEnemySelectionWeights(75.0, 20.0, 1.0, 1.25, 0.2, 0.0, 0.2, 0.0, 1.0, -1.0, 160, 0.1);
 		SetCombatV2(true);
 		AllowCombatRotation(true);
 		super.OnSpawned( spawnData );		
