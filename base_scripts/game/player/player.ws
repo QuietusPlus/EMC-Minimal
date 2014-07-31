@@ -1035,6 +1035,26 @@ import class CPlayer extends CActor
 		
 	}
 	
+	function DarkSetEffect() {
+		if( darkWeaponSilver || darkWeaponSteel ) {
+			if( !IsDarkSet() && !thePlayer.IsDarkEffect() &&  !thePlayer.IsNotGeralt()) {
+				theCamera.PlayEffect('dark_difficulty');
+				SetDarkEffect( true );
+				SetDarkWeaponAddVitality( false );
+			} else {
+				theCamera.StopEffect('dark_difficulty');
+				SetDarkEffect( false );
+				SetDarkWeaponAddVitality( true );
+			}
+		}
+		else
+		{
+			theCamera.StopEffect('dark_difficulty');
+			SetDarkEffect( false );
+			SetDarkWeaponAddVitality( false );
+		}
+	}
+	
 	function IsDarkEffect() : bool             		 { return darkEffect; }
 	function SetDarkEffect( val : bool )       		 
 	{ 
@@ -7882,23 +7902,3 @@ import state Base in CPlayer
 		return key == 'GI_AttackStrong';
 	}
 };
-
-function DarkSetEffect() {
-	if( darkWeaponSilver || darkWeaponSteel ) {
-		if( !IsDarkSet() && !thePlayer.IsDarkEffect() &&  !thePlayer.IsNotGeralt()) {
-			theCamera.PlayEffect('dark_difficulty');
-			SetDarkEffect( true );
-			SetDarkWeaponAddVitality( false );
-		} else {
-			theCamera.StopEffect('dark_difficulty');
-			SetDarkEffect( false );
-			SetDarkWeaponAddVitality( true );
-		}
-	}
-	else
-	{
-		theCamera.StopEffect('dark_difficulty');
-		SetDarkEffect( false );
-		SetDarkWeaponAddVitality( false );
-	}
-}
