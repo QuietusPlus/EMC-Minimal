@@ -4165,7 +4165,7 @@ mBoolean( true ) );
 			
 			m_canUseMedallion = false;
 			theHud.m_hud.SetIsMedallionActive( false );
-			AddTimer( 'OnEnableMedallion', 10.f, false );
+			AddTimer( 'OnEnableMedallion', 2.f, false );
 			
 			FindPowerPlaces();
 			
