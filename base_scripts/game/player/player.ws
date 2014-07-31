@@ -1051,52 +1051,10 @@ import class CPlayer extends CActor
 	function SetDarkWeaponSilver( val : bool ) 		 
 	{ 
 		darkWeaponSilver = val; 
-		if(val)
-		{
-			//First we should turn off all effects
-			//SetDarkEffect( false );
-			//SetDarkWeaponAddVitality( false );
-			theCamera.StopEffect('dark_difficulty');
-			
-			SetDarkWeaponAddVitality( true );
-			if(!thePlayer.IsDarkEffect())
-			{
-				if ( !thePlayer.IsNotGeralt() ) theCamera.PlayEffect('dark_difficulty');
-				SetDarkEffect( true );
-			}
-		}
-		else
-		{
-			SetDarkEffect( false );
-			SetDarkWeaponAddVitality( false );
-			theCamera.StopEffect('dark_difficulty');
-		}
 	}
 	function SetDarkWeaponSteel( val : bool )  		 
 	{ 
 		darkWeaponSteel = val; 
-		if(val)
-		{
-			//First we should turn off all effects
-			//SetDarkEffect( false );
-			//SetDarkWeaponAddVitality( false );
-			
-			theCamera.StopEffect('dark_difficulty');
-			
-			SetDarkWeaponAddVitality( true );
-
-			if(!thePlayer.IsDarkEffect())
-			{
-				if ( !thePlayer.IsNotGeralt() ) theCamera.PlayEffect('dark_difficulty');
-				SetDarkEffect( true );
-			}
-		}
-		else
-		{
-			SetDarkEffect( false );
-			SetDarkWeaponAddVitality( false );
-			theCamera.StopEffect('dark_difficulty');
-		}
 	}
 	function SetDarkWeaponAddVitality( val : bool )  
 	{ 
@@ -3527,6 +3485,7 @@ import class CPlayer extends CActor
 			SetDarkWeaponSilver(false);
 			SetDarkWeaponSteel(false);
 			SetDarkSet(false);		
+			DarkSetEffect();
 		}
 		else
 		{
@@ -3538,11 +3497,13 @@ import class CPlayer extends CActor
 					{
 						SetDarkWeaponSteel(true);
 						CheckSet(darkItem, thePlayer);
+						DarkSetEffect();
 					}
 					else if(GetInventory().ItemHasTag(darkItem, 'SilverSword'))
 					{
 						SetDarkWeaponSilver(true);
 						CheckSet(darkItem, thePlayer);
+						DarkSetEffect();
 					}
 				}
 			}
@@ -3551,6 +3512,7 @@ import class CPlayer extends CActor
 				SetDarkWeaponSilver(false);
 				SetDarkWeaponSteel(false);
 				SetDarkSet(false);
+				DarkSetEffect();
 			}
 		}
 		// --------------------------------------------------
@@ -7920,3 +7882,23 @@ import state Base in CPlayer
 		return key == 'GI_AttackStrong';
 	}
 };
+
+function DarkSetEffect() {
+	if( darkWeaponSilver || darkWeaponSteel ) {
+		if( !IsDarkSet() && !thePlayer.IsDarkEffect() &&  !thePlayer.IsNotGeralt()) {
+			theCamera.PlayEffect('dark_difficulty');
+			SetDarkEffect( true );
+			SetDarkWeaponAddVitality( false );
+		} else {
+			theCamera.StopEffect('dark_difficulty');
+			SetDarkEffect( false );
+			SetDarkWeaponAddVitality( true );
+		}
+	}
+	else
+	{
+		theCamera.StopEffect('dark_difficulty');
+		SetDarkEffect( false );
+		SetDarkWeaponAddVitality( false );
+	}
+}
