@@ -67,19 +67,70 @@ import class CGuiUtils extends CObject
 		
 		return output;
 	}
-	
-	function GetCustomTagName( inventory : CInventoryComponent, itemId : SItemUniqueId ) : string {
-		var itemSchemaCat		: name;
-		var TagCatTemp 		: string = "";
-		var TagWasSchematic 	: bool = false;
-		var TagCatName 		: string;
-		var TagCreatedItem 	: SItemUniqueId;
-		var itemCategory		: name = inventory.GetItemCategory( itemId );
-		var craftedItemName 	: name;
-		var itemName			: string = inventory.GetItemName( itemId );
-		var itemTags 			: array< name >;
+
+	public final function FillItemObject( inventory : CInventoryComponent, stats : CCharacterStats, itemId : SItemUniqueId, itemIdx : int, AS_item : int, 
+										  slotItems : array< SItemUniqueId >, optional custom : name )
+	{
+		var itemName		: string			= inventory.GetItemName( itemId );
+		var itemCategory	: name				= inventory.GetItemCategory( itemId );
+		var itemSchemaCat	: name;
+		var itemMask		: int				= inventory.GetItemTypeFlags( itemId );
+		var itemRunes		: array< name >;
+		var itemOils		: array< SBuff >;
+		var attributes		: array< name >;
+		var i, k			: int;
+		
+		var AS_attribute			: int;
+		var valAdd,		valMul		: float;
+		var valAddMax,	valMulMax	: float;
+		var valueS					: string;
+		
+		var AS_attributes	: int;
+		
+		var url : string;
+		var iconWidth, iconHeight : int;
+		
+		var itemTags : array< name >;
+		
+		var descFull : string;
+		
+		var craftedItemName : name;
+		
+		var allIngredientsNames : array< name >;
+		var ingredientMask	: int;
+		var AS_structure	: int;
+		var ingredients		: array< SItemIngredient >;
+		var fullDescTootlip : string;
+		
+		var AS_schemPart	: int; // voSchematicPart
+		var TagCatTemp : string = "";
+		var TagWasSchematic : bool = false;
+		var TagCatName : string;
+		var TagCreatedItem : SItemUniqueId;
 		
 		inventory.GetItemTags( itemId, itemTags );
+		
+		if ( inventory.IsItemMounted( itemId ) || inventory.IsItemHeld( itemId ) || slotItems.Contains( itemId ) )
+		{
+			itemMask |= 0x00000004;
+		}
+		
+		// rython TODO: sprawdz czy plik "icons/items/" + itemName + "_64x64.dds" istnieje
+		// jesli nie to defaultowa sciezke do defaultowego pliku dds podaj.
+		//if ( !theHud.FindIconPath( "default_64x64.dds", url, iconWidth, iconHeight ) )
+		//{
+			//url = "img://globals/gui/default_64x64.dds";
+		//}
+		
+		theHud.SetFloat	( "ID",			itemIdx,										AS_item );
+		//theHud.SetString( "Name",		itemNameHtml,				AS_item );
+		//theHud.SetString( "Icon",		"icons/items/" + itemName + "_64x64.dds",		AS_item );
+		theHud.SetString( "Icon",		"img://globals/gui/icons/items/" + StrReplaceAll(itemName, " ", "") + "_64x64.dds",	AS_item );
+		theHud.SetFloat ( "Class",		(int)inventory.GetItemClass( itemId ),			AS_item );
+		theHud.SetString( "Desc",		GetTooltipDesc(inventory, itemId) ,	AS_item ); // make TooltipShort
+		theHud.SetString( "Mask",		(string)itemMask,								AS_item );
+		theHud.SetFloat ( "Mass",		inventory.GetItemAttributeAdditive( itemId, 'item_weight' ), AS_item );
+		theHud.SetFloat	( "Price",		GetItemPrice( itemId, inventory ),	AS_item );
 		
 		if (itemCategory == 'schematic' ) {
 			itemSchemaCat = inventory.GetItemCategory( itemId );
@@ -114,13 +165,7 @@ import class CGuiUtils extends CObject
 					TagCatTemp = GetLocStringByKeyExt( "type_trash" );
 			//	}
 		} else if ( itemCategory == 'skillupgrade' ) {
-			//if ( itemName == "Minor Mutagen of Amplification" || itemName == "Minor Mutagen of Range" || itemName == "Minor Mutagen of Critical Effect" || itemName == "Minor Mutagen of Vitality" || itemName == "Minor Mutagen of Power" || itemName == "Minor Mutagen of Strength" ) {
-			//	TagCatTemp = GetLocStringByKeyExt( "type_mutagen" ) + "";
-			//} else if ( itemName == "Mutagen of Mutagen of Insanity" || itemName == "Mutagen of Concentration" || itemName == "Major Mutagen of Strength" || itemName == "Major Mutagen of Power" || itemName == "Major Mutagen of Vitality" || itemName == "Major Mutagen of Critical Effect" || itemName == "Major Mutagen of Amplification" ) {
-			//	TagCatTemp = GetLocStringByKeyExt( "type_mutagen" ) + "";
-			//} else {
-				TagCatTemp = GetLocStringByKeyExt( "type_mutagen" ) + "";
-			//}
+			TagCatTemp = GetLocStringByKeyExt( "type_mutagen" );
 		} else if ( itemCategory == 'weaponupgrade' ) {
 			TagCatTemp = GetLocStringByKeyExt( "type_grease" );
 		} else if ( itemCategory == 'pants' ) {
@@ -150,77 +195,17 @@ import class CGuiUtils extends CObject
 		}
 		
 		if ( TagWasSchematic ) {
+			// + ", " + GetLocStringByKeyExt("formulae");
 			itemCategory = itemSchemaCat;
 			inventory.RemoveItem( TagCreatedItem );
-			TagCatName = "(" + StrLeft( GetLocStringByKeyExt( "[[locale.inv.listcraftingingredients]]" ), 3 ) + ", " + StrLeft( TagCatTemp, 3) + ") " + GetLocStringByKeyExt( craftedItemName );
+			TagCatName = "(" + TagCatTemp + ") " + GetLocStringByKeyExt( craftedItemName );
 		} else if ( TagCatTemp == "" ) {
 			TagCatName = GetLocStringByKeyExt( itemName );
 		} else {
-			TagCatName = "(" + StrLeft( TagCatTemp, 3) + ") " + GetLocStringByKeyExt( itemName );
+			TagCatName = "(" + TagCatTemp + ") " + GetLocStringByKeyExt( itemName );
 		}
-		return TagCatName;
-	}
 	
-	public final function FillItemObject( inventory : CInventoryComponent, stats : CCharacterStats, itemId : SItemUniqueId, itemIdx : int, AS_item : int, 
-										  slotItems : array< SItemUniqueId >, optional custom : name )
-	{
-		var itemName		: string			= inventory.GetItemName( itemId );
-		var itemCategory	: name				= inventory.GetItemCategory( itemId );
-		var itemMask		: int				= inventory.GetItemTypeFlags( itemId );
-		var itemRunes		: array< name >;
-		var itemOils		: array< SBuff >;
-		var attributes		: array< name >;
-		var i, k			: int;
-		
-		var AS_attribute			: int;
-		var valAdd,		valMul		: float;
-		var valAddMax,	valMulMax	: float;
-		var valueS					: string;
-		
-		var AS_attributes	: int;
-		
-		var url : string;
-		var iconWidth, iconHeight : int;
-		
-		var itemTags : array< name >;
-		
-		var descFull : string;
-		
-		var craftedItemName : name;
-		
-		var allIngredientsNames : array< name >;
-		var ingredientMask	: int;
-		var AS_structure	: int;
-		var ingredients		: array< SItemIngredient >;
-		var fullDescTootlip : string;
-		
-		var AS_schemPart	: int; // voSchematicPart
-		
-		inventory.GetItemTags( itemId, itemTags );
-
-		
-		if ( inventory.IsItemMounted( itemId ) || inventory.IsItemHeld( itemId ) || slotItems.Contains( itemId ) )
-		{
-			itemMask |= 0x00000004;
-		}
-		
-		// rython TODO: sprawdz czy plik "icons/items/" + itemName + "_64x64.dds" istnieje
-		// jesli nie to defaultowa sciezke do defaultowego pliku dds podaj.
-		//if ( !theHud.FindIconPath( "default_64x64.dds", url, iconWidth, iconHeight ) )
-		//{
-			//url = "img://globals/gui/default_64x64.dds";
-		//}
-		
-		theHud.SetFloat	( "ID",			itemIdx,										AS_item );
-		theHud.SetString( "Name",		GetCustomTagName( inventory, itemId ),				AS_item );
-		//theHud.SetString( "Name",		itemNameHtml,				AS_item );
-		//theHud.SetString( "Icon",		"icons/items/" + itemName + "_64x64.dds",		AS_item );
-		theHud.SetString( "Icon",		"img://globals/gui/icons/items/" + StrReplaceAll(itemName, " ", "") + "_64x64.dds",	AS_item );
-		theHud.SetFloat ( "Class",		(int)inventory.GetItemClass( itemId ),			AS_item );
-		theHud.SetString( "Desc",		GetTooltipDesc(inventory, itemId) ,	AS_item ); // make TooltipShort
-		theHud.SetString( "Mask",		(string)itemMask,								AS_item );
-		theHud.SetFloat ( "Mass",		inventory.GetItemAttributeAdditive( itemId, 'item_weight' ), AS_item );
-		theHud.SetFloat	( "Price",		GetItemPrice( itemId, inventory ),	AS_item );
+		theHud.SetString( "Name", TagCatName, AS_item );
 		
 		// Elixirs
 		if ( itemTags.Contains('Elixir') )
@@ -312,7 +297,13 @@ import class CGuiUtils extends CObject
 				AS_schemPart = theHud.CreateAnonymousObject();
 				
 				theHud.SetFloat(  "ID", 		0,																AS_schemPart );
-				theHud.SetString( "Name",  		GetCustomTagName( inventory, inventory.GetItemId( ingredients[i].itemName ) ), 					AS_schemPart );
+				
+				if ( itemTags.Contains('Dismantle') ) {
+					theHud.SetString( "Name", "(" + GetLocStringByKeyExt( "[[locale.ov.lbdismantles]]" ) + ") " + GetLocStringByKeyExt(ingredients[i].itemName), AS_schemPart );
+				} else {
+					theHud.SetString( "Name", "(" + GetLocStringByKeyExt( "[[locale.inv.listcraftingingredients]]" ) + ") " + GetLocStringByKeyExt(ingredients[i].itemName), AS_schemPart );
+				}
+				
 				theHud.SetFloat(  "Count", 		ingredients[i].quantity, 										AS_schemPart );
 				theHud.SetString( "Icon",  		GetIngredientIconName( ingredients[i].itemName ), 				AS_schemPart );
 				theHud.SetFloat ( "Mass",  		GetItemNameMass( ingredients[i].itemName, inventory ), 			AS_schemPart );
