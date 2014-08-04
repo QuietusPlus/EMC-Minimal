@@ -63,20 +63,20 @@ class CContainer extends CGameplayEntity
 						theSound.PlaySound( "gui/hud/itemlooted" );
 					}
 				}
-			} else {
-				SetVisualsFull();
-				
-				if (!isNotEnabledOnSpawn) {
-					GetComponent("Loot").SetEnabled( true );
-				}
 			}
 		}
-		else
-		{
+		
+		if ( ! IsLootable() ) {
 			SetVisualsEmpty();
 			DestroyIt();
 			GetComponent("Loot").SetEnabled( false );
 			HideLootWindow();
+		} else {
+			SetVisualsFull();
+			
+			if (!isNotEnabledOnSpawn) {
+				GetComponent("Loot").SetEnabled( true );
+			}
 		}
 	}
 	
