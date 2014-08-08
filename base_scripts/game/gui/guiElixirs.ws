@@ -180,6 +180,11 @@ class CGuiElixirs extends CGuiPanel
 		for ( i = 0; i < ids.Size(); i += 1 )
 		{
 			itemId = m_mapElixItemIdxToId[ ids[i] ];
+					
+			if ( itemId == thePlayer.GetInventory().GetItemId('Respec') ) {
+				thePlayer.ClearBuild();
+			}
+			
 			theHud.m_utils.AddItemToBag( itemId );
 		}
 		

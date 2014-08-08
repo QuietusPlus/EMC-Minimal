@@ -356,7 +356,9 @@ import class CGuiUtils extends CObject
 			if ( inventory.ItemHasTag(itemId,'Sol') ) descFull += "<img src='img://globals/gui/icons/items/sol_64x64.dds' width='10' height='10'> ";
 			if ( inventory.ItemHasTag(itemId,'Fulgur') ) descFull += "<img src='img://globals/gui/icons/items/fulgur_64x64.dds' width='10' height='10'> ";
 			
-			if ( itemTags.Contains('NoTooltip') ) {
+			if ( itemId == inventory.GetItemId('Respec') ) {
+				theHud.SetString( "DescFull", GetLocStringByKeyExt( "x_tut61_title" ) + descFull + "<br>" + fullDescTootlip, AS_item );
+			} else if ( itemTags.Contains('NoTooltip') ) {
 				theHud.SetString( "DescFull", fullDescTootlip, AS_item );
 			} else {
 				theHud.SetString( "DescFull", GetLocStringByKeyExt( "Tooltip" + itemName ) + descFull + "<br>" + fullDescTootlip, AS_item );
