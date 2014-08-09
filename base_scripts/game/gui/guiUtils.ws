@@ -85,10 +85,13 @@ import class CGuiUtils extends CObject
 			tagCreatedName = inventory.GetCraftedItemName( tagItemId );
 			tagCreatedId = inventory.AddItem( StringToName( tagCreatedName ), 1, false );
 			tagItemCategory = inventory.GetItemCategory( tagCreatedId );
+			inventory.GetItemTags( tagCreatedId, tagItemTags );
 			tagCreatedItem = true;
 		}
 		
-		if ( tagItemTags.Contains('SortTypeQuest') || tagItemCategory == 'quest') {
+		if ( tagItemTags.Contains('DarkDiffA1')|| tagItemTags.Contains('DarkDiffA2') || tagItemTags.Contains('DarkDiffA3') ) {
+			tagLocTag = GetLocStringByKeyExt( "menudifficultyveryhard" );
+		} else if ( tagItemTags.Contains('SortTypeQuest') || tagItemCategory == 'quest') {
 			if ( tagItemCategory == 'key' ) {
 				tagLocTag = GetLocStringByKeyExt( "type_key" );
 			} else {
